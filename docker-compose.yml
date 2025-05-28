@@ -1,17 +1,18 @@
-version: '3.1'
+version: '3.8'
 
 services:
   wordpress:
     image: wordpress:latest
     ports:
       - 80:80
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: mypassword
-    depends_on:
-      - db
 
   db:
     image: mariadb:10.11
@@ -21,3 +22,8 @@ services:
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: mypassword
       MYSQL_ROOT_PASSWORD: rootpassword
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
